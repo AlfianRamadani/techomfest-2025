@@ -4,6 +4,7 @@ class Helper
 {
     public function validateImageType($image)
     {
+
         $type = exif_imagetype($image['tmp_name']); // get the type of image
         return $type !== false; // return false if not image 
     }
@@ -13,7 +14,7 @@ class Helper
         $size = filesize($image['tmp_name']); // get size of image
         if ($size > $maxSize) return false;  // return false if image size larger than 5mb
     }
-    public function imageToBase64($image)
+    static public function imageToBase64($image)
     {
         $path = $image["tmp_name"];
         $type = mime_content_type($path);
