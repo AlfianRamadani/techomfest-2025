@@ -6,5 +6,7 @@ use Illuminate\Http\Request;
 
 class ResponseController extends Controller
 {
-    //
+    public function upload(){
+        
+    }
 }
