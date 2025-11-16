@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 
 class ResultController extends Controller
 {
-    public static function resultIndex(){
+    public static function resultIndex()
+    {
         return view('result');
     }
 }
