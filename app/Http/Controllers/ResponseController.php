@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Helper;
+use App\Helpers\Helper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 
 class ResponseController extends Controller
 {
+
+    public static function upladIndex()
+    {
+        return view('upload');
+    }
+
     private $apiKey;
 
     public function __construct()
@@ -20,15 +26,21 @@ class ResponseController extends Controller
         $request->validate([
             'image' => 'required|image|max:5120',
         ]);
-        $path = $request->file('image')["tmp_name"];
-        $mime = mime_content_type($path);
-        $base64 = \Helper::imageToBase64($request->file('image'));
 
+        $file = $request->file('image');
+
+        $mime = $file->getClientMimeType();
+
+        $base64 = Helper::imageToBase64($file);
 
         $result = $this->analyzeImage($mime, $base64);
 
-        return response()->json($result);
+        return redirect()
+            ->route('result.index')
+            ->with('result', $result);
     }
+
+
     protected function analyzeImage($mime, $base64)
     {
         $payload = [
