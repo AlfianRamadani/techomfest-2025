@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Request as FacadesRequest;
 class ResponseController extends Controller
 {
 
-    public static function upladIndex()
+    public static function uploadIndex()
     {
         return view('upload');
     }

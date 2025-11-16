@@ -18,12 +18,11 @@ class Helper
         return $image->getSize() <= $maxSize;
     }
 
-    public static function imageToBase64(UploadedFile $image)
+    public static function imageToBase64(UploadedFile $image): string
     {
         $path = $image->getPathname();
-        $type = $image->getMimeType();
         $data = file_get_contents($path);
 
-        return 'data:' . $type . ';base64,' . base64_encode($data);
+        return base64_encode($data);
     }
 }
