@@ -48,7 +48,7 @@ class ResponseController extends Controller
     protected function analyzeImage($mime, $base64, $lauk, $bumbu)
     {
         $json_ex =
-            <<<EOT
+        <<<EOT
         {
         "analysis_status": "success",
         "dish_name": "Nasi Goreng Ayam Spesial",
@@ -141,7 +141,7 @@ class ResponseController extends Controller
                                 Gunakan informasi tambahan user hanya jika relevan dan konsisten dengan visual foto.
                                 Jika ada perbedaan antara foto dan informasi user, dahulukan data dari foto dan sesuaikan penjelasannya.
 
-                                Analisa makanan dalam foto ini dan uraikan tanpa tambahan teks apapun dan jangan pakai code block dan format tambahan, serta analisis juga keseluruhan lauknya sebagaimana bentuk contoh json seperti ini {$json_ex}
+                                Analisa makanan dalam foto ini dan uraikan tanpa tambahan teks apapun terutama TANPA markdown code block dan ```json, serta analisis juga keseluruhan lauknya (jika ada dalam gambar) sebagaimana bentuk contoh json seperti ini {$json_ex} 
                             "
                         ]
                     ]

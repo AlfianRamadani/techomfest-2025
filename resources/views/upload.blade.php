@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
-<body class="flex flex-col gap-7 justify-center items-center h-screen font-[poppins]" id="main_body">
+<body class="flex flex-col gap-7 justify-center items-center h-screen font-[poppins] pt-20" id="main_body">
     <form method="POST" action="{{ route('upload.image') }}" enctype="multipart/form-data">
         @csrf
         <div class="w-fit flex flex-col gap-7 items-center">
