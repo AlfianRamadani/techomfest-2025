@@ -25,15 +25,19 @@ class ResponseController extends Controller
     {
         $request->validate([
             'image' => 'required|image|max:5120',
+            'lauk_makanan' => 'nullable|string',
+            'bumbu_tambahan' => 'nullable|string',
         ]);
 
         $file = $request->file('image');
+        $lauk = $request->input('lauk_makanan');
+        $bumbu = $request->input('bumbu_tambahan');
 
         $mime = $file->getClientMimeType();
 
         $base64 = Helper::imageToBase64($file);
 
-        $result = $this->analyzeImage($mime, $base64);
+        $result = $this->analyzeImage($mime, $base64, $lauk, $bumbu);
 
         return redirect()
             ->route('result.index')
@@ -41,10 +45,10 @@ class ResponseController extends Controller
     }
 
 
-    protected function analyzeImage($mime, $base64)
+    protected function analyzeImage($mime, $base64, $lauk, $bumbu)
     {
-        $json_ex = 
-        <<<EOT
+        $json_ex =
+            <<<EOT
         {
         "analysis_status": "success",
         "dish_name": "Nasi Goreng Ayam Spesial",
@@ -70,7 +74,7 @@ class ResponseController extends Controller
             "riskiest_ingredient": "Kecap Manis dan Minyak Goreng",
             "risk_score_overall_100": 75,
             "risk_details": "Kandungan natrium (garam) melebihi batas konsumsi harian yang disarankan. Tingginya lemak jenuh dari minyak sawit juga berisiko.",
-            
+
             "disease_risk_scores": {
             "cardiovascular_disease": {
                 "contributing_factor": "Tinggi Lemak Jenuh & Kolesterol",
@@ -109,6 +113,14 @@ class ResponseController extends Controller
         }
         EOT;
 
+        $userInfo = "
+        Informasi tambahan dari user:
+        - Lauk makanan: {$lauk}
+        - Bumbu tambahan: {$bumbu}
+
+        Jika tidak terlihat di gambar namun disebutkan user, anggap informasi tersebut valid dan sertakan dalam analisis.
+        ";
+
         $payload = [
             "contents" => [
                 [
@@ -120,7 +132,17 @@ class ResponseController extends Controller
                             ]
                         ],
                         [
-                            "text" => "Analisa makanan dalam foto ini dan uraikan tanpa tambahan teks apapun dan jangan pakai code block dan format tambahan, serta analisis juga keseluruhan lauknya sebagaimana bentuk contoh json seperti ini {$json_ex}"
+                            "text" => "
+                                Analisa makanan dalam foto ini secara menyeluruh berdasarkan:
+                                1. Informasi visual dari gambar (komposisi utama, lauk, bumbu, kuah, saus, minyak, rempah).
+                                2. Informasi tambahan dari user berikut ini:
+                                {$userInfo}
+
+                                Gunakan informasi tambahan user hanya jika relevan dan konsisten dengan visual foto.
+                                Jika ada perbedaan antara foto dan informasi user, dahulukan data dari foto dan sesuaikan penjelasannya.
+
+                                Analisa makanan dalam foto ini dan uraikan tanpa tambahan teks apapun dan jangan pakai code block dan format tambahan, serta analisis juga keseluruhan lauknya sebagaimana bentuk contoh json seperti ini {$json_ex}
+                            "
                         ]
                     ]
                 ]

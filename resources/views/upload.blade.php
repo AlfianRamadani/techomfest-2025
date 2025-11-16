@@ -33,10 +33,15 @@
                 </div>
             </div>
 
-            <div class="flex flex-col items-center gap-2">
-                <div class="flex gap-3 items-center border-2  px-3 py-2.5 rounded-2xl border-gray-200">
+            <input type="text" name="lauk_makanan" class="border px-3 py-2 rounded-2xl outline-0 w-full"
+                placeholder="Lauk (contoh: ayam goreng, telur, sosis)">
 
-                    <input type="text" class=" min-w-96 outline-0" placeholder="Tambahkan deskripsi makanan Anda...">
+            <input type="text" name="bumbu_tambahan" class="border px-3 py-2 rounded-2xl outline-0 w-full"
+                placeholder="Bumbu tambahan (contoh: sambal, kecap, mayo)">
+
+            <div class="flex flex-col items-center gap-2">
+
+                <div class="flex gap-3 items-center border-2  px-3 py-2.5 rounded-2xl border-gray-200">
 
                     <button type="submit"
                         class="bg-blue-300 text-white rounded-full p-2 cursor-pointer hover:bg-blue-200 !bg-gray-500 !cursor-default"
