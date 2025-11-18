@@ -29,7 +29,12 @@ class ResponseController extends Controller
             'bumbu_tambahan' => 'nullable|string',
         ]);
 
+        info($request->all());
+
         $file = $request->file('image');
+        $sizeInBytes = $file->getSize();
+        info($sizeInBytes);
+
         $lauk = $request->input('lauk_makanan');
         $bumbu = $request->input('bumbu_tambahan');
 
