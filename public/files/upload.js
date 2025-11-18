@@ -31,7 +31,7 @@ formImageUpload.addEventListener("change", async (event) => {
 
     // ADDITION TO CHANGE FILE INPUT
         const compressedFile = new File([optimalBlob], file.name, {
-            type: 'image/jpeg',
+            type: 'image/webp',
             lastModified: Date.now(),
         });
 
@@ -71,6 +71,6 @@ function compressImage(image, scale, initalWidth, initalHeight){
         
         ctx.canvas.toBlob((blob) => {
             resolve(blob);
-        }, "image/png"); 
+        }, "image/webp"); 
     }); 
 }
