@@ -26,7 +26,7 @@ formImageUpload.addEventListener("change", async (event) => {
 
     const compressedBlob = widthRatioBlob.size > heightRatioBlob.size ? heightRatioBlob : widthRatioBlob;
     
-    const optimalBlob = compressedBlob.size < file.size ? compressedBlob : file; 
+    const optimalBlob = compressedBlob; 
     console.log(`Inital Size: ${file.size}. Compressed Size: ${optimalBlob.size}`);
 
     // ADDITION TO CHANGE FILE INPUT
