@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Helpers\Helper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 
 class ResponseController extends Controller
@@ -21,26 +24,47 @@ class ResponseController extends Controller
     {
         $this->apiKey = config('gemini.api_key');
     }
+
     public function upload(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|max:5120',
+            'image' => 'required|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'lauk_makanan' => 'nullable|string',
             'bumbu_tambahan' => 'nullable|string',
         ]);
 
-        info($request->all());
-
         $file = $request->file('image');
-        $sizeInBytes = $file->getSize();
-        info($sizeInBytes);
 
-        $lauk = $request->input('lauk_makanan');
-        $bumbu = $request->input('bumbu_tambahan');
+        if (!Storage::disk('public')->exists('uploads/originals')) {
+            Storage::disk('public')->makeDirectory('uploads/originals');
+        }
 
-        $mime = $file->getClientMimeType();
+        $originalName = time() . '_ORIGINAL_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+        Storage::disk('public')->put('uploads/originals/' . $originalName, $file->get()); // ← simpan file original tanpa modifikasi
 
-        $base64 = Helper::imageToBase64($file);
+        $manager = new ImageManager(new Driver());
+
+        $image = $manager->read($file->getRealPath());
+
+        $image->orient();
+
+        $image->scale(width: 1500);
+
+        $optimizedBinary = $image->toJpeg(quality: 80)->toString();
+
+        if (!Storage::disk('public')->exists('uploads/optimized')) {
+            Storage::disk('public')->makeDirectory('uploads/optimized');
+        }
+
+        $optimizedName = time() . '_OPTIMIZED_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . ".jpg";
+
+        Storage::disk('public')->put('uploads/optimized/' . $optimizedName, $optimizedBinary);
+
+        $base64 = base64_encode($optimizedBinary);
+        $mime = "image/jpeg";
+
+        $lauk = $request->lauk_makanan;
+        $bumbu = $request->bumbu_tambahan;
 
         $result = $this->analyzeImage($mime, $base64, $lauk, $bumbu);
 
@@ -49,11 +73,10 @@ class ResponseController extends Controller
             ->with('result', $result);
     }
 
-
     protected function analyzeImage($mime, $base64, $lauk, $bumbu)
     {
         $json_ex =
-        <<<EOT
+            <<<EOT
         {
         "analysis_status": "success",
         "dish_name": "Nasi Goreng Ayam Spesial",
@@ -146,7 +169,7 @@ class ResponseController extends Controller
                                 Gunakan informasi tambahan user hanya jika relevan dan konsisten dengan visual foto.
                                 Jika ada perbedaan antara foto dan informasi user, dahulukan data dari foto dan sesuaikan penjelasannya.
 
-                                Analisa makanan dalam foto ini dan uraikan tanpa tambahan teks apapun terutama TANPA markdown code block dan ```json, serta analisis juga keseluruhan lauknya (jika ada dalam gambar) sebagaimana bentuk contoh json seperti ini {$json_ex} 
+                                Analisa makanan dalam foto ini dan uraikan tanpa tambahan teks apapun terutama TANPA markdown code block dan ```json, serta analisis juga keseluruhan lauknya (jika ada dalam gambar) sebagaimana bentuk contoh json seperti ini {$json_ex}
                             "
                         ]
                     ]
