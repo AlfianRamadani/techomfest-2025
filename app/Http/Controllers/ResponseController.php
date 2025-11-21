@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
+use App\Models\FoodCategories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +16,8 @@ class ResponseController extends Controller
 
     public static function uploadIndex()
     {
-        return view('upload');
+        $foodCategories = FoodCategories::pluck('name');
+        return view('upload', compact('foodCategories'));
     }
 
     private $apiKey;
@@ -27,53 +29,58 @@ class ResponseController extends Controller
 
     public function upload(Request $request)
     {
+        $startTime = microtime(true);
+
         $request->validate([
-            'image' => 'required|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'lauk_makanan' => 'nullable|string',
-            'bumbu_tambahan' => 'nullable|string',
+            'image' => 'required|mimes:webp|max:5120',
+            'kategori_makanan' => 'string|exists:food_categories,name'
         ]);
 
         $file = $request->file('image');
+        $mime = $file->getMimeType();
 
+        $validationTime = microtime(true);
         if (!Storage::disk('public')->exists('uploads/originals')) {
             Storage::disk('public')->makeDirectory('uploads/originals');
         }
 
         $originalName = time() . '_ORIGINAL_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-        Storage::disk('public')->put('uploads/originals/' . $originalName, $file->get()); // ← simpan file original tanpa modifikasi
+        $path = 'uploads/originals/' . $originalName;
+        Storage::disk('public')->put($path, $file->get());
 
-        $manager = new ImageManager(new Driver());
+        $base64 = base64_encode($file->get());
+        
 
-        $image = $manager->read($file->getRealPath());
+        $kategori_makanan = $request->kategori_makanan ?? null;
 
-        $image->orient();
+        $aiStartTime = microtime(true);
+        $result = $this->analyzeImage($mime, $base64, $kategori_makanan);
+        $aiEndTime = microtime(true);
 
-        $image->scale(width: 1500);
+        $endTime = microtime(true);
 
-        $optimizedBinary = $image->toJpeg(quality: 80)->toString();
+        $timings = [
+            'validation_time' => round(($validationTime - $startTime) * 1000, 2),
+            'ai_analysis_time' => round(($aiEndTime - $aiStartTime) * 1000, 2),
+            'total_time' => round(($endTime - $startTime) * 1000, 2)
+        ];
 
-        if (!Storage::disk('public')->exists('uploads/optimized')) {
-            Storage::disk('public')->makeDirectory('uploads/optimized');
-        }
+        $imageInfo = [
+            'original_size' => $file->getSize(),
+            'original_path' => $file->getRealPath()
+        ];
 
-        $optimizedName = time() . '_OPTIMIZED_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . ".jpg";
+        session([
+            'result' => $result,
+            'timings' => $timings,
+            'image_info' => $imageInfo
+        ]);
 
-        Storage::disk('public')->put('uploads/optimized/' . $optimizedName, $optimizedBinary);
-
-        $base64 = base64_encode($optimizedBinary);
-        $mime = "image/jpeg";
-
-        $lauk = $request->lauk_makanan;
-        $bumbu = $request->bumbu_tambahan;
-
-        $result = $this->analyzeImage($mime, $base64, $lauk, $bumbu);
-
-        return redirect()
-            ->route('result.index')
-            ->with('result', $result);
+        return redirect()->route('result.index');
     }
 
-    protected function analyzeImage($mime, $base64, $lauk, $bumbu)
+
+    protected function analyzeImage($mime, $base64, $kategori_makanan)
     {
         $json_ex =
             <<<EOT
@@ -143,8 +150,7 @@ class ResponseController extends Controller
 
         $userInfo = "
         Informasi tambahan dari user:
-        - Lauk makanan: {$lauk}
-        - Bumbu tambahan: {$bumbu}
+        - Kategori Makanan: {$kategori_makanan} 
 
         Jika tidak terlihat di gambar namun disebutkan user, anggap informasi tersebut valid dan sertakan dalam analisis.
         ";

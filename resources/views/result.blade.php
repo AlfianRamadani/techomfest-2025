@@ -21,6 +21,57 @@
 
     <div class="container py-5">
         <h2 class="text-center mb-4">Hasil Analisa Gambar</h2>
+        @php
+            $image_info = session('image_info');
+        @endphp
+
+        @if ($image_info)
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                <img class="img-fluid" src="{{ $image_info['original_path'] }}" alt="Optimized Image">
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <strong>File Size</strong>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <h5 class="text-muted">Size</h5>
+                            <h3 class="text-primary">{{ $image_info['original_size'] }} byte</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+        @php
+            $timings = session('timings');
+        @endphp
+
+        @if ($timings)
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <strong>Performance Metrics</strong>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <h5 class="text-muted">Validation</h5>
+                            <h3 class="text-primary">{{ $timings['validation_time'] }} ms</h3>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <h5 class="text-muted">AI Analysis</h5>
+                            <h3 class="text-primary">{{ $timings['ai_analysis_time'] }} ms</h3>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <h5 class="text-muted">Total Time</h5>
+                            <h3 class="text-success">{{ $timings['total_time'] }} ms</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
 
         @php
             $result = session('result');

@@ -34,11 +34,16 @@
                 </div>
             </div>
 
-            <input type="text" name="lauk_makanan" class="border px-3 py-2 rounded-2xl outline-0 w-full"
-                placeholder="Lauk (contoh: ayam goreng, telur, sosis)">
-
-            <input type="text" name="bumbu_tambahan" class="border px-3 py-2 rounded-2xl outline-0 w-full"
-                placeholder="Bumbu tambahan (contoh: sambal, kecap, mayo)">
+            <div class="w-full">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Makanan(Opsional)</label>
+                <select name="kategori_makanan"
+                    class="border-2 border-gray-200 rounded-2xl px-4 py-2.5 w-full focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all duration-200 bg-white cursor-pointer hover:border-gray-300 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-[length:1.2em] bg-[right_0.7rem_center] bg-no-repeat pr-10">
+                    <option value="" disabled selected>Pilih kategori makanan</option>
+                    @foreach ($foodCategories as $item)
+                        <option value="{{ $item }}">{{ $item }}</option>
+                    @endforeach
+                </select>
+            </div>
 
             <div class="flex flex-col items-center gap-2">
 
@@ -46,7 +51,8 @@
 
                     <button type="submit"
                         class="bg-blue-300 text-white rounded-full p-2 cursor-pointer hover:bg-blue-200 !bg-gray-500 !cursor-default"
-                        id="send_image">
+                        id="send_image"
+                        onclick="this.disabled=true; this.innerHTML='<svg class=\'animate-spin size-6\' xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\'><circle class=\'opacity-25\' cx=\'12\' cy=\'12\' r=\'10\' stroke=\'currentColor\' stroke-width=\'4\'></circle><path class=\'opacity-75\' fill=\'currentColor\' d=\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\'></path></svg>'; this.form.submit();">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
